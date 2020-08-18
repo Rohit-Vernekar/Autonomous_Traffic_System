@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/bootstrap.css')}}">
+    <script src="{{url_for('static', filename='js/jquery.js')}}"></script>
+    <script src="{{url_for('static', filename='js/popper.js')}}"></script>
+    <script src="{{url_for('static', filename='js/bootstrap.js')}}"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/w3.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/lato.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/font-awesome.css')}}">
+
+    <script>
+        var timer;
+        function countDown(timeleft) {
+            var downloadTimer = setInterval(function () {
+                document.getElementById("countdown1").innerHTML = "&nbsp&nbsp&nbsp" + timeleft + " seconds remaining";
+                timeleft -= 1;
+                if (timeleft <= 0) {
+                    clearInterval(downloadTimer);
+                    document.getElementById("countdown1").innerHTML = "&nbsp &nbsp &nbsp &nbsp  &nbsp &nbsp  &nbsp &nbsp &nbsp &nbsp STOP"
+                }
+            }, 1000);
+            return downloadTimer;
+        }
+
+        function getDensity() {
+            $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+            $.getJSON($SCRIPT_ROOT+"/getDensity",
+                function(data) {
+                    $("#density").text(data.density + "%");
+                    clearInterval(timer);
+                    timer = countDown(data.timer);
+                });
+        };
+
+        function start() {
+            $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+            $.getJSON($SCRIPT_ROOT+"/startVideo",
+                function(data) {
+                    document.getElementById("image").src = "{{url_for('static', filename='greenCircle.png')}}"
+
+                });
+        };
+
+        function stop() {
+            $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+            $.getJSON($SCRIPT_ROOT+"/stopVideo",
+                function(data) {
+                    document.getElementById("image").src = "{{url_for('static', filename='redCircle.png')}}"
+
+                });
+        };
+
+        function pause() {
+            $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+            $.getJSON($SCRIPT_ROOT+"/pauseVideo",
+                function(data) {
+                    if (data.pause == 0){
+                        $("#pause").text("PAUSE")
+                    }
+                    else{
+                        $("#pause").text("PLAY")
+                    }
+                });
+        };
+    </script>
+
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Passion+One);
+        table, td, th {
+            border: 3px solid #ddd;
+            text-align: left;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            padding: 15px;
+        }
+
+        .button1 {
+            background-color: #4CAF50;
+            font-family: 'Passion One';
+            border: none;
+            color: white;
+            width: 120px;
+            padding: 16px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            background-color: white;
+            color: black;
+            border: 2px solid #f44336;
+        }
+
+        .button1:hover {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .button {
+            width: 100%;
+            height: 60px;
+        }
+
+        .button:hover {
+            background-color: #f44336;
+            color: white;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .column {
+
+            width: 33.33%;
+            padding: 10px;
+            height: 180px;
+        }
+
+        img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #title, #countdown1, .dis, #calcDensity, #density{
+            font-family: 'Passion One';
+        }
+
+    </style>
+</head>
+
+<body>
+<img src="{{url_for('static', filename='kle.png')}}" style="position: absolute; top: 5px; left: 30px; height: 150px;" />
+<table>
+    <tr>
+        <td colspan="2" id="title" style="font-size: 20pt;">
+            <center>
+                <div style="font-size: 15pt;">KLE Dr. M. S. Sheshgiri College of Engineering and Technology <br/>
+                    Belagavi - 590008<br/><br/></div>
+                Autonomous Traffic Controller System
+            </center>
+        </td>
+    </tr>
+    <tr>
+        <td rowspan="3" style="padding: 0px">
+            <img src="{{ url_for('video_feed') }}" width="90%" height="250" />
+        </td>
+
+        <td>
+            <button id="start" class="button1" onclick="start()"> START</button>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <button id="stop" class="button1" onclick="stop()"> STOP</button>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <button id="pause" class="button1" onclick="pause()">PAUSE</button>
+        </td>
+    </tr>
+
+</table>
+
+<div class="row">
+    <div class="column">
+        <h1 class="dis" align="center" style="color: #8b4513"> SIGNAL</h1>
+
+        <img src="{{url_for('static', filename='redCircle.png')}}" class="center" alt="Smiley face" id="image" width="100" height="100">
+    </div>
+    <div class="column">
+        <h1 class="dis" align="center" style="color: #8b4513">DENSITY</h1>
+        <h1 align="center" style="font-size: 60px; color: #ff8c00" id="density">NA</h1>
+    </div>
+    <div class="column">
+        <h1 class="dis" align="center" style="color: #8b4513">TIMER</h1>
+        <br>
+        <h1 align="center" class="text-success" style='display:inline' id="countdown1">&nbsp&nbsp&nbsp&nbsp</h1>
+        <h1 align="center" style='display:inline' class="text-danger" id="countdown"></h1>
+    </div>
+</div>
+<button class="button" type="button" onclick="getDensity()" id="calcDensity">CALCULATE DENSITY</button>
+</body>
+</html>

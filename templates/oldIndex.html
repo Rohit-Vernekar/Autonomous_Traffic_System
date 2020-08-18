@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/bootstrap.css')}}">
+    <script src="{{url_for('static', filename='js/jquery.js')}}"></script>
+    <script src="{{url_for('static', filename='js/popper.js')}}"></script>
+    <script src="{{url_for('static', filename='js/bootstrap.js')}}"></script>
+
+    <script>
+        var timer;
+        function countDown(timeleft) {
+            var downloadTimer = setInterval(function () {
+                document.getElementById("countdown1").innerHTML = timeleft + " seconds remaining";
+                timeleft -= 1;
+                if (timeleft <= 0) {
+                    clearInterval(downloadTimer);
+                    document.getElementById("countdown1").innerHTML = "STOP"
+                }
+            }, 1000);
+            return downloadTimer;
+        }
+
+        function getDensity() {
+            $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+            $.getJSON($SCRIPT_ROOT+"/getDensity",
+                function(data) {
+                    $("#density").text(data.density + "%");
+                    clearInterval(timer);
+                    timer = countDown(data.timer);
+                });
+        };
+
+        function start() {
+            $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+            $.getJSON($SCRIPT_ROOT+"/startVideo",
+                function(data) {
+                    document.getElementById("image").src = "{{url_for('static', filename='greenCircle.png')}}"
+
+                });
+        };
+
+        function stop() {
+            $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+            $.getJSON($SCRIPT_ROOT+"/stopVideo",
+                function(data) {
+                    document.getElementById("image").src = "{{url_for('static', filename='redCircle.png')}}"
+
+                });
+        };
+
+        function pause() {
+            $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+            $.getJSON($SCRIPT_ROOT+"/pauseVideo",
+                function(data) {
+                    if (data.pause == 0){
+                        $("#pause").text("PAUSE")
+                    }
+                    else{
+                        $("#pause").text("PLAY")
+                    }
+                });
+        };
+
+
+    </script>
+
+    <style>
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        .button1 {
+            display: inline-block;
+            padding: 15px 25px;
+            font-size: 24px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            outline: none;
+            color: #fff;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 9px #999;
+        }
+
+        .button1:hover {
+            background-color: #3e8e41
+        }
+
+        .button1:active {
+            background-color: #3e8e41;
+            box-shadow: 0 5px #666;
+            transform: translateY(4px);
+        }
+
+        .button {
+            width: 100%;
+        }
+
+        .button:hover {
+            background-color: #f44336;
+            color: white;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .column {
+
+            width: 33.33%;
+            padding: 10px;
+            height: 210px;
+        }
+
+        img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<table>
+    <tr>
+        <td rowspan="3">
+            <img src="{{ url_for('video_feed') }}" width="90%" height="350">
+        </td>
+
+        <td>
+            <button id="start" class="button1" onclick="start()"> START &nbsp</button>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <button id="stop" class="button1" onclick="stop()"> STOP &nbsp</button>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <button id="pause" class="button1" onclick="pause()">PAUSE</button>
+        </td>
+    </tr>
+
+</table>
+
+<div class="row">
+    <div class="column" style="background-color:#aaa;">
+        <h3 align="center"> Signal</h3>
+        <img src="{{url_for('static', filename='redCircle.png')}}" class="center" alt="Smiley face" id="image" width="100" height="100">
+    </div>
+    <div class="column" style="background-color:#bbb;">
+        <h3 align="center">Density</h3>
+        <h1 align="center" id="density">35%</h1>
+    </div>
+    <div class="column" style="background-color:#ccc;">
+        <h3 align="center">Timer</h3>
+        <h1 align="center" class="text-success" style='display:inline' id="countdown1"></h1>
+        <h1 align="center" style='display:inline' class="text-danger" id="countdown"></h1>
+    </div>
+</div>
+<button class="button" type="button" onclick="getDensity()">Calculate Density</button>
+</body>
+</html>
